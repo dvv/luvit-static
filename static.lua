@@ -96,7 +96,11 @@ local function static_handler(mount, options)
         stop = size - 1
       end
       if stop < start then
-        return self:serve_invalid_range(file.size)
+        self:write_head(416, {
+          ['Content-Range'] = 'bytes=*/' .. file.size
+        })
+        self:finish()
+        return
       end
       -- adjust Content-Length:
       headers['Content-Length'] = stop - start + 1
@@ -160,7 +164,8 @@ local function static_handler(mount, options)
     local file = cache[filename]
     -- no need to serve anything if file is cached at client side
     if file and file.headers['Last-Modified'] == req.headers['if-modified-since'] then
-      res:serve_not_modified(file.headers)
+      res:write_head(304, file.headers)
+      res:finish()
       return
     end
 
