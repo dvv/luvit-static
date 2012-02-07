@@ -5,7 +5,7 @@
 local Table = require('table')
 local UV = require('uv')
 local Fs = require('fs')
-local get_type = require('mime').get_type
+local get_type = require('mime').getType
 local date = require('os').date
 local resolve = require('path').resolve
 local parse_url = require('url').parse
@@ -20,7 +20,7 @@ local CHUNK_SIZE = 4096
 local function noop() end
 
 local function stream_file(path, offset, size, progress, callback)
-  UV.fs_open(path, 'r', '0666', function (err, fd)
+  UV.fsOpen(path, 'r', '0666', function (err, fd)
     if err then
       callback(err)
       return
@@ -28,10 +28,10 @@ local function stream_file(path, offset, size, progress, callback)
     local readchunk
     readchunk = function ()
       local chunk_size = size < CHUNK_SIZE and size or CHUNK_SIZE
-      UV.fs_read(fd, offset, chunk_size, function (err, chunk)
+      UV.fsRead(fd, offset, chunk_size, function (err, chunk)
         if err or #chunk == 0 then
           callback(err)
-          UV.fs_close(fd, noop)
+          UV.fsClose(fd, noop)
         else
           chunk_size = #chunk
           offset = offset + chunk_size
@@ -96,7 +96,7 @@ local function static_handler(mount, options)
         stop = size - 1
       end
       if stop < start then
-        self:write_head(416, {
+        self:writeHead(416, {
           ['Content-Range'] = 'bytes=*/' .. file.size
         })
         self:finish()
@@ -106,9 +106,9 @@ local function static_handler(mount, options)
       headers['Content-Length'] = stop - start + 1
       -- append Content-Range:
       headers['Content-Range'] = ('bytes=%d-%d/%d'):format(start, stop, size)
-      self:write_head(206, headers)
+      self:writeHead(206, headers)
     else
-      self:write_head(200, headers)
+      self:writeHead(200, headers)
     end
     -- serve from cache, if available
     if file.data then
@@ -164,7 +164,7 @@ local function static_handler(mount, options)
     local file = cache[filename]
     -- no need to serve anything if file is cached at client side
     if file and file.headers['Last-Modified'] == req.headers['if-modified-since'] then
-      res:write_head(304, file.headers)
+      res:writeHead(304, file.headers)
       res:finish()
       return
     end
@@ -195,8 +195,8 @@ local function static_handler(mount, options)
         cache[filename] = file
         -- should any changes in this file occur, invalidate cache entry
         -- TODO: reuse caching technique from luvit/kernel
-        file.watch = UV.new_fs_watcher(filename)
-        file.watch:set_handler('change', invalidate_cache_entry)
+        file.watch = Fs.Watcher:new(filename)
+        file.watch:setHandler('change', invalidate_cache_entry)
         -- shall we cache file contents?
         local cache_it = options.is_cacheable and options.is_cacheable(file)
         serve(res, file, req.headers.range, cache_it)

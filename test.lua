@@ -12,5 +12,5 @@ local function handler(req, res)
     })
   )
 end
-require('http').create_server('0.0.0.0', 8080, handler())
+require('http').createServer('0.0.0.0', 8080, handler())
 print('Static file server listening at http://localhost:8080/')
