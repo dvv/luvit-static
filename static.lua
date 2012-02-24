@@ -3,7 +3,8 @@
 --
 
 local Table = require('table')
-local UV = require('uv')
+local UV = require('uv_native')
+local uv = require('uv')
 local Fs = require('fs')
 local get_type = require('mime').getType
 local date = require('os').date
@@ -195,7 +196,7 @@ local function static_handler(mount, options)
         cache[filename] = file
         -- should any changes in this file occur, invalidate cache entry
         -- TODO: reuse caching technique from luvit/kernel
-        file.watch = Fs.Watcher:new(filename)
+        file.watch = uv.Watcher:new(filename)
         file.watch:setHandler('change', invalidate_cache_entry)
         -- shall we cache file contents?
         local cache_it = options.is_cacheable and options.is_cacheable(file)
