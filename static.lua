@@ -141,6 +141,7 @@ local function static_handler(mount, options)
   end
 
   -- cache some locals
+  local fstat = options.follow and Fs.stat or Fs.lstat
   local max_age = options.max_age or 0
   local uri_skip = #mount + 1
 
@@ -173,7 +174,7 @@ local function static_handler(mount, options)
     if file then
       serve(res, file, req.headers.range, false)
     else
-      Fs.stat(filename, function (err, stat)
+      fstat(filename, function (err, stat)
         -- file not found? proceed to next layer
         if err then nxt() ; return end
         -- create cache entry, even for files which contents are not
