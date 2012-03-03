@@ -146,6 +146,7 @@ local function static_handler(mount, options)
   local fstat = options.follow and Fs.stat or Fs.lstat
   local max_age = options.max_age or 0
   local uri_skip = #mount + 1
+  local auto_index = options.auto_index
 
   --
   -- request handler
@@ -163,6 +164,12 @@ local function static_handler(mount, options)
     -- map url to local filesystem filename
     -- TODO: Path.normalize(req.url)
     local filename = resolve(options.directory, uri.pathname:sub(uri_skip))
+
+    -- filename ends with / and auto_index allowed?
+    if auto_index and filename:sub(-1, -1) == '/' then
+      -- append auto_index to filename
+      filename = filename .. auto_index
+    end
 
     -- stream file, possibly caching the contents for later reuse
     local file = cache[filename]
