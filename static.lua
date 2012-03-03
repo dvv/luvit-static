@@ -163,6 +163,7 @@ local function static_handler(mount, options)
   local max_age = options.max_age or 0
   local uri_skip = #mount + 1
   local auto_index = options.auto_index
+  local redirect_folders = auto_index and options.redirect_folders ~= false
 
   --
   -- request handler
@@ -204,9 +205,19 @@ local function static_handler(mount, options)
       fstat(filename, function (err, stat)
         -- filename not found? proceed to next layer
         if err then nxt() ; return end
-        -- filename is directory? proceed to next layer
-        -- FIXME: filename = Path.join(filename, auto_index)?
-        if stat.is_directory then nxt() ; return end
+        -- filename is directory?
+        if stat.is_directory then
+          -- redirection is not turned off?
+          if redirect_folders then
+            -- append / to the pathname and redirect there
+            res:writeHead(301, { Location = uri.pathname .. '/' .. uri.search })
+            res:finish()
+          -- proceed to the next layer
+          else
+            nxt()
+          end
+          return
+        end
         -- create cache entry, even for files which contents are not
         -- gonna be cached
         -- collect information on file
