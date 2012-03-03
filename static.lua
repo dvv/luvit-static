@@ -113,7 +113,9 @@ local function static_handler(mount, options)
     end
     -- serve from cache, if available
     if file.data then
-      self:finish(range and file.data.sub(start + 1, stop - start + 1) or file.data)
+      self:finish(
+          range and file.data.sub(start + 1, stop - start + 1) or file.data
+        )
     -- otherwise stream and possibly cache
     else
       -- N.B. don't cache if range specified
@@ -165,7 +167,9 @@ local function static_handler(mount, options)
     -- stream file, possibly caching the contents for later reuse
     local file = cache[filename]
     -- no need to serve anything if file is cached at client side
-    if file and file.headers['Last-Modified'] == req.headers['if-modified-since'] then
+    if file
+      and file.headers['Last-Modified'] == req.headers['if-modified-since']
+    then
       res:writeHead(304, file.headers)
       res:finish()
       return
