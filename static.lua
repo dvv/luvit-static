@@ -189,7 +189,7 @@ local function static_handler(mount, options)
             ['Content-Type'] = get_type(filename),
             ['Content-Length'] = stat.size,
             ['Cache-Control'] = 'public, max-age=' .. (max_age / 1000),
-            ['Last-Modified'] = date('%c', stat.mtime),
+            ['Last-Modified'] = date('!%c', stat.mtime),
             ['Etag'] = stat.size .. '-' .. stat.mtime
           },
         }
