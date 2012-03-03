@@ -27,6 +27,8 @@ local function make_handler()
       follow = true,
       -- redirect directories to underneath index.html
       auto_index = 'index.html',
+      -- uncomment to not redirect folders
+      -- redirect_folders = false,
     })
   )
 end
