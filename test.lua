@@ -16,6 +16,8 @@ local function make_handler()
         -- cache all
         return true
       end,
+      -- chunk size
+      chunk_size = 4096,
       -- follow symlinks
       follow = true,
       -- redirect directories to underneath index.html

@@ -11,21 +11,23 @@ local date = require('os').date
 local resolve = require('path').resolve
 local parse_url = require('url').parse
 
+local function noop() end
+
 --
 -- open file `path`, seek to `offset` octets from beginning and
 -- read `size` subsequent octets.
 -- call `progress` on each read chunk
 --
 
-local CHUNK_SIZE = 4096
-local function noop() end
-
-local function stream_file(path, offset, size, progress, callback)
+local function stream_file(path, offset, size, progress, callback, CHUNK_SIZE)
+  CHUNK_SIZE = CHUNK_SIZE or 4096
   UV.fsOpen(path, 'r', '0666', function (err, fd)
     if err then
       callback(err)
       return
     end
+    -- FIXME: disk optimization: the very first read() should read data up to
+    -- the start of next CHUNK_SIZE, so that subsequent reads be aligned?
     local readchunk
     readchunk = function ()
       local chunk_size = size < CHUNK_SIZE and size or CHUNK_SIZE
@@ -140,7 +142,14 @@ local function static_handler(mount, options)
           file.data = Table.concat(parts, '')
         end
       end
-      stream_file(file.name, start, stop - start + 1, progress, eof)
+      stream_file(
+          file.name,
+          start,
+          stop - start + 1,
+          progress,
+          eof,
+          options.chunk_size
+        )
     end
   end
 
