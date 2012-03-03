@@ -60,8 +60,8 @@ end
 -- setup request handler
 --
 
-local function static_handler(mount, options)
-  if not options then options = { } end
+local function setup(mount, options)
+  options = options or { }
 
   -- given Range: header, return start, end numeric pair
   local function parse_range(range, size)
@@ -153,17 +153,19 @@ local function static_handler(mount, options)
           stop - start + 1,
           progress,
           eof,
-          options.chunk_size
+          options.chunkSize
         )
     end
   end
 
   -- cache some locals
   local fstat = options.follow and Fs.stat or Fs.lstat
-  local max_age = options.max_age or 0
+  local max_age = options.maxAge or 0
+  local root = options.root
   local uri_skip = #mount + 1
-  local auto_index = options.auto_index
-  local redirect_folders = auto_index and options.redirect_folders ~= false
+  local auto_index = options.autoIndex
+  local redirect_folders = auto_index and options.redirectFolders ~= false
+  local is_cacheable = options.isCacheable or noop
 
   --
   -- request handler
@@ -180,7 +182,7 @@ local function static_handler(mount, options)
 
     -- map url to local filesystem filename
     -- TODO: Path.normalize(req.url)
-    local filename = resolve(options.directory, uri.pathname:sub(uri_skip))
+    local filename = resolve(root, uri.pathname:sub(uri_skip))
 
     -- filename ends with / and auto_index allowed?
     if auto_index and filename:sub(-1, -1) == '/' then
@@ -241,7 +243,7 @@ local function static_handler(mount, options)
         file.watch = uv.Watcher:new(filename)
         file.watch:setHandler('change', invalidate_cache_entry)
         -- shall we cache file contents?
-        local cache_it = options.is_cacheable and options.is_cacheable(file)
+        local cache_it = is_cacheable(file)
         serve(res, file, req.headers.range, cache_it)
       end)
     end
@@ -249,4 +251,4 @@ local function static_handler(mount, options)
 end
 
 -- module
-return static_handler
+return setup

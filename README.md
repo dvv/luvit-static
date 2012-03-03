@@ -7,33 +7,33 @@ Usage
 ```lua
 local Static = require('static')
 
-local function make_handler()
+local function makeHandler()
   return require('stack').stack(
     Static('/', {
       -- root of static server
-      directory = __dirname,
+      root = __dirname,
       -- cache in the browser for 1 day
-      max_age = 24*60*60*1000,
+      maxAge = 24*60*60*1000,
       -- cache served files
-      is_cacheable = function (file_stat)
+      isCacheable = function (fileStat)
         -- analyze file stat?
-        -- return file_stat.size < 65536
+        -- return fileStat.size < 65536
         -- or cache all
         return true
       end,
       -- chunk size
-      chunk_size = 4096,
+      chunkSize = 4096,
       -- follow symlinks
       follow = true,
       -- redirect directories to underneath index.html
-      auto_index = 'index.html',
+      autoIndex = 'README.md',
       -- uncomment to not redirect folders
-      -- redirect_folders = false,
+      -- redirectFolders = false,
     })
   )
 end
 
-require('http').createServer(make_handler()):listen(8080, '0.0.0.0')
+require('http').createServer(makeHandler()):listen(8080, '0.0.0.0')
 
 print('Static file server listening at http://localhost:8080/')
 ```
