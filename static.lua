@@ -75,8 +75,10 @@ local function static_handler(mount, options)
   local function invalidate_cache_entry(status, event, path)
     -- invalidate cache entry and free the watcher
     if cache[path] then
-      cache[path].watch:close()
+      local entry = cache[path]
       cache[path] = nil
+      entry.watch:close()
+      entry.watch = nil
     end
   end
 
