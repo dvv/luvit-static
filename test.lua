@@ -11,9 +11,9 @@ local function make_handler()
       max_age = 24*60*60*1000,
       -- cache served files
       is_cacheable = function (file_stat)
-        -- cache only small files
+        -- analyze file stat?
         -- return file_stat.size < 65536
-        -- cache all
+        -- or cache all
         return true
       end,
       -- chunk size
