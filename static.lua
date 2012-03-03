@@ -26,10 +26,15 @@ local function stream_file(path, offset, size, progress, callback, CHUNK_SIZE)
       callback(err)
       return
     end
-    -- FIXME: disk optimization: the very first read() should read data up to
-    -- the start of next CHUNK_SIZE, so that subsequent reads be aligned?
     local readchunk
-    readchunk = function ()
+    readchunk = function (err)
+      if err then
+        callback(err)
+        UV.fsClose(fd, noop)
+        return
+      end
+      -- FIXME: disk optimization: the very first read() should read data up to
+      -- the start of next CHUNK_SIZE, so that subsequent reads be aligned?
       local chunk_size = size < CHUNK_SIZE and size or CHUNK_SIZE
       UV.fsRead(fd, offset, chunk_size, function (err, chunk)
         if err or #chunk == 0 then
