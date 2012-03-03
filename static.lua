@@ -186,8 +186,11 @@ local function static_handler(mount, options)
       serve(res, file, req.headers.range, false)
     else
       fstat(filename, function (err, stat)
-        -- file not found? proceed to next layer
+        -- filename not found? proceed to next layer
         if err then nxt() ; return end
+        -- filename is directory? proceed to next layer
+        -- FIXME: filename = Path.join(filename, auto_index)?
+        if stat.is_directory then nxt() ; return end
         -- create cache entry, even for files which contents are not
         -- gonna be cached
         -- collect information on file
