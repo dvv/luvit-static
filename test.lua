@@ -1,10 +1,10 @@
 #!/usr/bin/env luvit
 
-local Stack = require('stack')
+local Static = require('static')
 
 local function make_handler()
-  return Stack.stack(
-    require('static')('/', {
+  return require('stack').stack(
+    Static('/', {
       -- root of static server
       directory = __dirname,
       -- cache in the browser for 1 day
