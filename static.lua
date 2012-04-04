@@ -79,7 +79,7 @@ local function setup(mount, options)
   -- cache entries table
   local cache = { }
   -- handler for 'change' event of all file watchers
-  local function invalidate_cache_entry(status, event, path)
+  local function invalidate_cache_entry(event, path)
     -- invalidate cache entry and free the watcher
     if cache[path] then
       local entry = cache[path]
@@ -241,7 +241,19 @@ local function setup(mount, options)
         -- should any changes in this file occur, invalidate cache entry
         -- TODO: reuse caching technique from luvit/kernel
         file.watch = uv.Watcher:new(filename)
-        file.watch:setHandler('change', invalidate_cache_entry)
+-- TODO: watcher reports relative path: https://github.com/joyent/libuv/blob/master/src/unix/linux/inotify.c#L156-160
+if false then
+        file.watch:on('change', invalidate_cache_entry)
+else
+        file.watch:on('change', function ()
+          -- invalidate cache entry and free the watcher
+          if cache[filename] then
+            cache[filename] = nil
+            file.watch:close()
+            file.watch = nil
+          end
+        end)
+end
         -- shall we cache file contents?
         local cache_it = is_cacheable(file)
         serve(res, file, req.headers.range, cache_it)
