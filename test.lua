@@ -1,12 +1,12 @@
 #!/usr/bin/env luvit
 
-local Static = require('static')
+local Static = require('.')
 
 local function makeHandler()
   return require('stack').stack(
-    Static('/', {
+    Static(__dirname, {
       -- root of static server
-      root = __dirname,
+      mount = '/',
       -- cache in the browser for 1 day
       maxAge = 24*60*60*1000,
       -- cache served files
@@ -21,13 +21,15 @@ local function makeHandler()
       -- follow symlinks
       follow = true,
       -- redirect directories to underneath index.html
-      autoIndex = 'README.md',
+      autoIndex = 'license.txt',
       -- uncomment to not redirect folders
       -- redirectFolders = false,
     })
   )
 end
 
-require('http').createServer(makeHandler()):listen(8080, '0.0.0.0')
+require('http').createServer(makeHandler()):listen(3000, function ()
+  print('Static file server listening at http://localhost:3000/')
+end)
 
-print('Static file server listening at http://localhost:8080/')
+
