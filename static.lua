@@ -207,6 +207,8 @@ local function setup(mount, options)
       fstat(filename, function (err, stat)
         -- filename not found? proceed to next layer
         if err then nxt() ; return end
+        -- filename is symlink and follow symlinks is disabled? not found
+        if stat.is_symbolic_link and not options.follow then nxt(); return end
         -- filename is directory?
         if stat.is_directory then
           -- redirection is not turned off?
