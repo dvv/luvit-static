@@ -107,7 +107,7 @@ local function setup(mount, options)
       end
       if stop < start then
         self:writeHead(416, {
-          ['Content-Range'] = 'bytes=*/' .. file.size
+          ['Content-Range'] = 'bytes */' .. file.size
         })
         self:finish()
         return
@@ -115,7 +115,7 @@ local function setup(mount, options)
       -- adjust Content-Length:
       headers['Content-Length'] = stop - start + 1
       -- append Content-Range:
-      headers['Content-Range'] = ('bytes=%d-%d/%d'):format(start, stop, size)
+      headers['Content-Range'] = ('bytes %d-%d/%d'):format(start, stop, size)
       self:writeHead(206, headers)
     else
       self:writeHead(200, headers)
