@@ -60,8 +60,16 @@ end
 -- setup request handler
 --
 
-local function setup(mount, options)
+local function setup(root, options)
   options = options or { }
+
+  -- root is not optional anymore.
+  if not root then error('root path must be given!') end
+  options.root = root
+
+  -- mount now defaults to '/'
+  local mount = options.mount or '/'
+
 
   -- given Range: header, return start, end numeric pair
   local function parse_range(range, size)

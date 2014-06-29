@@ -9,9 +9,9 @@ local Static = require('static')
 
 local function makeHandler()
   return require('stack').stack(
-    Static('/', {
-      -- root of static server
-      root = __dirname,
+    Static(__dirname, {
+      -- mountpoint for your static server.
+      mount = '/'
       -- cache in the browser for 1 day
       maxAge = 24*60*60*1000,
       -- cache served files
